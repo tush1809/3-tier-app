@@ -14,7 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Frontend linting (React/JavaScript)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -24,12 +23,10 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      # 2. Backend linting (Node.js)
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm ci
 
-      # 3. SCA (Dependency vulnerability scanning) with GitHub's CodeQL
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
@@ -38,53 +35,26 @@ jobs:
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
 
-
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Make sure this runner is on the same machine as your kubeadm cluster
     needs: lint-and-security
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Build frontend Docker image
+        run: docker build -t 3-tier-frontend:latest ./frontend
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
+      - name: Build backend Docker image
+        run: docker build -t 3-tier-backend:latest ./backend
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          region: ${{ secrets.AWS_REGION }}
-
-      - name: Build and push frontend Docker image
+      - name: Load images into local Kubernetes (if required)
         run: |
-          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/3-tier-frontend:latest ./frontend
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/3-tier-frontend:latest
+          # This step is only needed if your cluster doesn't share the same Docker daemon
+          echo "Make sure your images are accessible to the cluster"
 
-      - name: Build and push backend Docker image
-        run: |
-          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/3-tier-backend:latest ./backend
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/3-tier-backend:latest
-
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
-
-      - name: Deploy to EKS
+      - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f mongo/
           kubectl apply -f k8s_manifests/
