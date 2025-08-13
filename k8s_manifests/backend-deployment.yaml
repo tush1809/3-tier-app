@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: tusharsharma/three-tier-backend:latest   # Changed to Docker Hub
+        image: tush1809/3-tier-backend:latest   # Changed to Docker Hub
         imagePullPolicy: Always
         env:
           - name: MONGO_CONN_STR
