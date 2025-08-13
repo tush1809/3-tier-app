@@ -30,13 +30,14 @@ jobs:
         run: npm ci
 
       # 3. SCA (Dependency vulnerability scanning) with GitHub's CodeQL
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+    
+    - name: Perform CodeQL analysis
+      uses: github/codeql-action/analyze@v3
 
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
 
   build-and-deploy:
     runs-on: ubuntu-latest
