@@ -35,8 +35,8 @@ jobs:
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
 
-  build-and-deploy:
-    runs-on: self-hosted  # Make sure this runner is on the same machine as your kubeadm cluster
+  build:
+    runs-on: ubuntu-latest  # Make sure this runner is on the same machine as your kubeadm cluster
     needs: lint-and-security
 
     steps:
@@ -53,7 +53,9 @@ jobs:
         run: |
           # This step is only needed if your cluster doesn't share the same Docker daemon
           echo "Make sure your images are accessible to the cluster"
-
+  deploy:
+    runs-on: self-hosted
+    steps:
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f mongo/
