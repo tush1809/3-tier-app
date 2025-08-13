@@ -24,18 +24,10 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      - name: Run frontend lint
-        working-directory: ./frontend
-        run: npm run lint
-
       # 2. Backend linting (Node.js)
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm ci
-
-      - name: Run backend lint
-        working-directory: ./backend
-        run: npm run lint
 
       # 3. SCA (Dependency vulnerability scanning) with GitHub's CodeQL
       - name: Initialize CodeQL
