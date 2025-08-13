@@ -58,5 +58,5 @@ jobs:
     steps:
       - name: Apply Kubernetes manifests
         run: |
-          kubectl apply -f mongo/
+          kubectl apply -f k8s_manifests/mongo/
           kubectl apply -f k8s_manifests/
