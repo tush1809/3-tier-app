@@ -23,23 +23,19 @@ spec:
     spec:
       containers:
         - name: backend
-          image: tush1809/3-tier-backend:latest   # Changed to Docker Hub
+          image: tush1809/3-tier-backend:latest
           imagePullPolicy: Always
-          env:
-            - name: MONGO_URL
-              value: mongodb://mongodb-svc:27017/todo
-            - name: MONGO_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-sec
-                  key: username
-            - name: MONGO_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-sec
-                  key: password
           ports:
             - containerPort: 8080
+          # --- CORRECTED ENVIRONMENT VARIABLE ---
+          env:
+            # Your application should expect a single MONGO_URI variable
+            - name: MONGO_URI # Or whatever variable name your app expects
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-sec
+                  key: MONGO_URI # Use the key containing the full connection string
+          # ------------------------------------
           livenessProbe:
             httpGet:
               path: /ok
