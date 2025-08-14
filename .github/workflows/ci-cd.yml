@@ -83,10 +83,11 @@ jobs:
           echo "Make sure your images are accessible to the cluster"
   deploy:
     runs-on: self-hosted
+    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s_manifests/mongo/ -n workshop
