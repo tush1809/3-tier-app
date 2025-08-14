@@ -27,15 +27,12 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          # --- CORRECTED ENVIRONMENT VARIABLE ---
           env:
-            # Your application should expect a single MONGO_URI variable
-            - name: MONGO_URI # Or whatever variable name your app expects
+            - name: MONGO_URI
               valueFrom:
                 secretKeyRef:
                   name: mongo-sec
-                  key: MONGO_URI # Use the key containing the full connection string
-          # ------------------------------------
+                  key: MONGO_URI
           livenessProbe:
             httpGet:
               path: /ok
