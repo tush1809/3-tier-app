@@ -10,9 +10,10 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/ok', (req, res) => {
-    res.status(200).send('ok')
-  })
+  res.status(200).send('ok');
+});
 
+// The tasks router is mounted on '/api/tasks', not '/tasks'
 app.use("/api/tasks", tasks);
 
 const port = process.env.PORT || 8080;
